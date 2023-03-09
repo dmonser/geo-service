@@ -1,5 +1,8 @@
-import org.junit.Test;
+package ru.netology.sender;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -8,56 +11,43 @@ import ru.netology.entity.Country;
 import ru.netology.entity.Location;
 import ru.netology.geo.GeoService;
 import ru.netology.i18n.LocalizationService;
-import ru.netology.sender.MessageSenderImpl;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class MessageSenderImplTest {
+import static org.junit.jupiter.api.Assertions.*;
+
+class MessageSenderImplTest {
+
+    @BeforeEach
+    void setUp() {
+    }
+
+    @AfterEach
+    void tearDown() {
+    }
 
     @ParameterizedTest
     @MethodSource("addSource")
-    public void testSend(Location location, String ip, String expected) {
-        System.out.println("Starting send test");
-        GeoServiceMok geoServiceMok = new GeoServiceMok();
-        geoServiceMok.setValue(location);
+    void send(Location location, String ip, String expected) {
+        //arrange
+        GeoService geoService = Mockito.mock(GeoService.class);
+        Mockito.when(geoService.byIp(ip))
+                .thenReturn(location);
 
-        LocalizationServiceMok localizationServiceMok = new LocalizationServiceMok();
-        Country country = location.getCountry();
-        localizationServiceMok.setValue(country.name());
+        LocalizationService localizationService = Mockito.mock(LocalizationService.class);
+        Mockito.when(localizationService.locale(location.getCountry()))
+                .thenReturn(expected);
 
-        MessageSenderImpl messageSender = new MessageSenderImpl(geoServiceMok, localizationServiceMok);
-
+        MessageSenderImpl messageSender = new MessageSenderImpl(geoService, localizationService);
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put(MessageSenderImpl.IP_ADDRESS_HEADER, ip);
+        headers.put(MessageSenderImpl.IP_ADDRESS_HEADER, "172.123.12.19");
         //act
         String result = messageSender.send(headers);
         //assert
         Assertions.assertEquals(expected, result);
     }
-
-//    @ParameterizedTest
-//    @MethodSource("addSource")
-//    public void testSend(Location location, String ip, String expected) {
-//        System.out.println("Starting send test");
-//        GeoService geoService = Mockito.mock(GeoService.class);
-//        Mockito.when(geoService.byIp(ip))
-//                .thenReturn(location);
-//
-//        LocalizationService localizationService = Mockito.mock(LocalizationService.class);
-//        Mockito.when(localizationService.locale(location.getCountry()))
-//                .thenReturn(expected);
-//
-//        MessageSenderImpl messageSender = new MessageSenderImpl(geoService, localizationService);
-//
-//        Map<String, String> headers = new HashMap<String, String>();
-//        headers.put(MessageSenderImpl.IP_ADDRESS_HEADER, ip);
-//        //act
-//        String result = messageSender.send(headers);
-//        //assert
-//        Assertions.assertEquals(expected, result);
-//    }
 
     public static Stream<Arguments> addSource() {
         String ip1 = "127.0.0.1";

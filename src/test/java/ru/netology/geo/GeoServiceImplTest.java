@@ -1,63 +1,47 @@
-import org.junit.Test;
+package ru.netology.geo;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.netology.entity.Country;
 import ru.netology.entity.Location;
-import ru.netology.geo.GeoServiceImpl;
 
 import java.util.stream.Stream;
 
-public class GeoServiceImplTests {
-    GeoServiceImpl geoService;
+class GeoServiceImplTest {
+
+    private GeoServiceImpl geoService;
 
     @BeforeEach
-    public void beforeEach() {
+    public void setUp() {
         System.out.println("before each");
         geoService = new GeoServiceImpl();
     }
 
     @AfterEach
-    public void afterEach(){
+    public void tearDown() {
         System.out.println("after each");
         geoService = null;
     }
 
     @ParameterizedTest
     @MethodSource("addSource")
-    public void testByIp(String ip, Location location){
+    public void byIp(String ip, Location expected) {
         System.out.println("Start byIp test");
         //act
         Location result = geoService.byIp(ip);
 
         //assert
-        Assertions.assertEquals(location.getCity(), result.getCity());
-    }
-
-    @Test
-    public void testByIpOther(){ //test with another IP
-        System.out.println("test byIp with non equal 172. or 96.");
-        String ip = "54.99.0.5";
-        String expected = null;
-        //act
-        Executable executable = () -> geoService.byIp(ip);
-
-        //assert
-        Assertions.assertThrows(NullPointerException.class, executable);
-    }
-
-    @Test
-    public void testByCoordinates() {
-        System.out.println("Start test by coordinates");
-        int a = 56, b = 78;
-        //act
-        Executable executable = () -> geoService.byCoordinates(a, b);
-        //assert
-        Assertions.assertThrows(RuntimeException.class, executable);
+        if (result != null) {
+            Assertions.assertEquals(expected.getCity(), result.getCity());
+        } else {
+            Assertions.assertEquals(expected, result);
+        }
     }
 
     public static Stream<Arguments> addSource(){
@@ -79,7 +63,18 @@ public class GeoServiceImplTests {
                 Arguments.of(ip2, location2),
                 Arguments.of(ip3, location3),
                 Arguments.of(ip4, location4),
-                Arguments.of(ip5, location5)
+                Arguments.of(ip5, location5),
+                Arguments.of(ip6, null)
         );
+    }
+
+    @Test
+    public void byCoordinates() {
+        System.out.println("Start test by coordinates");
+        int a = 56, b = 78;
+        //act
+        Executable executable = () -> geoService.byCoordinates(a, b);
+        //assert
+        Assertions.assertThrows(RuntimeException.class, executable);
     }
 }

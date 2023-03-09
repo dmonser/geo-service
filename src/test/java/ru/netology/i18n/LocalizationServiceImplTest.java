@@ -1,32 +1,35 @@
+package ru.netology.i18n;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.netology.entity.Country;
-import ru.netology.i18n.LocalizationServiceImpl;
 
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.*;
 
-public class LocalizationServiceImplTest {
-    LocalizationServiceImpl sut;
+class LocalizationServiceImplTest {
 
-    @BeforeEach
-    public void beforeEach(){
-        sut = new LocalizationServiceImpl();
-    }
+    private LocalizationServiceImpl sut;
 
     @AfterEach
-    public void afterEach(){
+    public void tearDown() {
         sut = null;
+    }
+
+    @BeforeEach
+    public void setUp() {
+        sut = new LocalizationServiceImpl();
     }
 
     @ParameterizedTest
     @MethodSource("addSource")
-    public void testLocale(Country country, String expected){
+    public void locale(Country country, String expected) {
         System.out.println("Start locale test");
         //act
         String result = sut.locale(country);
